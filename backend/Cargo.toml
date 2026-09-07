@@ -1,0 +1,22 @@
+[package]
+name = "arcane_webb_apps_backend"
+version = "0.1.0"
+description = "Arcane Webb Apps desktop application"
+edition = "2021"
+
+[lib]
+name = "app_lib"
+path = "src/lib.rs"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-store = "2"
+tauri-plugin-global-shortcut = "2"
+
+[[bin]]
+name = "arcane-webb-apps"
+path = "src/main.rs"
