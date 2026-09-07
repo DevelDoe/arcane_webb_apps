@@ -1,5 +1,9 @@
 # Arcane Webb Apps
 
+<p align="center">
+  <img src="assets/webb-apps-icon-source.png" alt="Arcane Webb Apps icon" width="180" />
+</p>
+
 Turn any website into a focused desktop app.
 
 Arcane Webb Apps is a tiny, local-first launcher inspired by the simplicity of
