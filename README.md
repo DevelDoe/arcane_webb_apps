@@ -55,6 +55,8 @@ Global shortcuts work while Arcane Webb Apps is running. Common shortcut names
 include `CommandOrControl`, `Shift`, `Alt`, and function keys such as `F8`.
 Closing the launcher hides it to the tray so those shortcuts remain available. Use
 the tray menu's **Quit Webb Apps** action when you want to stop it completely.
+The launcher window opens normally whenever Webb Apps starts; tray-only mode begins
+only after you close the main window.
 
 ## Build from source
 

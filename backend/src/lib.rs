@@ -194,6 +194,7 @@ pub fn run() {
                     }
                 });
             }
+            show_launcher(app.handle());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
