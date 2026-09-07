@@ -1,6 +1,6 @@
 [package]
 name = "arcane_webb_apps_backend"
-version = "0.1.0"
+version = "0.1.1"
 description = "Arcane Webb Apps desktop application"
 edition = "2021"
 
