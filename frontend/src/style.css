@@ -23,7 +23,7 @@ label { display: grid; gap: 7px; margin-top: 18px; color: #b8c3ca; font-size: 13
 .workspace > h1 { font-size: clamp(38px, 7vw, 74px); letter-spacing: -.05em; }
 .workspace > .muted { max-width: 680px; }
 .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 48px; }
-.app-card { position: relative; min-height: 126px; padding: 20px 42px 18px 18px; display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: start; gap: 14px; border: 1px solid #243039; border-radius: 14px; background: #0d1318cc; cursor: pointer; transition: transform .15s ease, border-color .15s ease, background .15s ease; }
+.app-card { position: relative; min-height: 126px; padding: 20px 76px 18px 18px; display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: start; gap: 14px; border: 1px solid #243039; border-radius: 14px; background: #0d1318cc; cursor: pointer; transition: transform .15s ease, border-color .15s ease, background .15s ease; }
 .app-card:hover, .app-card:focus { transform: translateY(-2px); border-color: #52616b; background: #111a20; outline: none; }
 .app-icon { width: 48px; height: 48px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 12px; color: #0b1014; background: #d7b45d; font-size: 20px; font-weight: 900; }
 .app-info { min-width: 0; }
@@ -33,8 +33,10 @@ label { display: grid; gap: 7px; margin-top: 18px; color: #b8c3ca; font-size: 13
 .muted-shortcut { display: block; padding-top: 5px; }
 kbd { min-width: 0; padding: 5px 7px; overflow: hidden; border: 1px solid #34434d; border-bottom-width: 2px; border-radius: 6px; color: #aebac2; background: #080d11; font: 10px ui-monospace, monospace; letter-spacing: 0; text-overflow: ellipsis; text-transform: none; white-space: nowrap; }
 .icon-button { padding: 4px 8px; color: #89969f; background: transparent; font-size: 20px; line-height: 1; }
-.app-card > .icon-button { position: absolute; top: 9px; right: 9px; opacity: 0; }
-.app-card:hover > .icon-button, .app-card:focus > .icon-button { opacity: 1; }
+.card-actions { position: absolute; top: 9px; right: 9px; display: flex; align-items: center; gap: 1px; opacity: .55; transition: opacity .15s ease; }
+.card-actions .icon-button:first-child { font-size: 14px; }
+.app-card:hover .card-actions, .app-card:focus .card-actions, .card-actions:focus-within { opacity: 1; }
+.card-actions .icon-button:hover, .card-actions .icon-button:focus { color: #e9c769; background: #1a242b; outline: none; }
 .empty-state { min-height: 150px; display: grid; place-items: center; align-content: center; gap: 8px; border: 1px dashed #34434d; color: #cbd7df; background: transparent; }
 .empty-state span { color: #d7b45d; font-size: 28px; }
 .empty-state small { color: #78858e; font-weight: 400; }

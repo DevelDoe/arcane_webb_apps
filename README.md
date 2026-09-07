@@ -16,7 +16,7 @@ websites you use every day one keystroke away.
 - Add any HTTP or HTTPS website
 - Launch sites in separate frameless windows
 - Reposition frameless windows from a small fixed overlay handle
-- Right-click a saved app to edit its name, URL, or shortcut
+- Use a card's settings icon—or right-click it—to edit its name, URL, or shortcut
 - Record shortcuts by pressing the desired key combination in the shortcut field
 - Assign optional system-wide keyboard shortcuts
 - Lives quietly in the macOS menu bar or Windows/Linux system tray

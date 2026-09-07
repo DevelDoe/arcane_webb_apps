@@ -112,7 +112,10 @@ async function renderWorkspace(): Promise<void> {
                 <p>${escapeHtml(new URL(webApp.url).hostname)}</p>
                 ${webApp.shortcut ? `<div class="app-shortcut"><span>Shortcut</span><kbd title="${escapeHtml(webApp.shortcut)}">${escapeHtml(webApp.shortcut)}</kbd></div>` : `<div class="app-shortcut muted-shortcut">No shortcut</div>`}
               </div>
-              <button class="icon-button" data-delete-id="${webApp.id}" aria-label="Remove ${escapeHtml(webApp.name)}">×</button>
+              <div class="card-actions">
+                <button class="icon-button" data-card-action data-edit-id="${webApp.id}" aria-label="Edit ${escapeHtml(webApp.name)}" title="Edit web app">&#9881;&#65038;</button>
+                <button class="icon-button" data-card-action data-delete-id="${webApp.id}" aria-label="Remove ${escapeHtml(webApp.name)}" title="Remove web app">×</button>
+              </div>
             </article>`).join("") : `
             <button class="empty-state" id="empty-add-button">
               <span>＋</span><strong>Add your first web app</strong><small>Paste a URL and optionally assign a global shortcut.</small>
@@ -183,7 +186,7 @@ async function renderWorkspace(): Promise<void> {
       if (webApp) void requestWebAppLaunch(webApp);
     };
     card.addEventListener("click", (event) => {
-      if (!(event.target as HTMLElement).closest("[data-delete-id]")) open();
+      if (!(event.target as HTMLElement).closest("[data-card-action]")) open();
     });
     card.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") open();
@@ -191,6 +194,13 @@ async function renderWorkspace(): Promise<void> {
     card.addEventListener("contextmenu", (event) => {
       event.preventDefault();
       const webApp = webApps.find((candidate) => candidate.id === card.dataset.openId);
+      if (webApp) showAppForm(webApp);
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>("[data-edit-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const webApp = webApps.find((candidate) => candidate.id === button.dataset.editId);
       if (webApp) showAppForm(webApp);
     });
   });
