@@ -107,8 +107,11 @@ async function renderWorkspace(): Promise<void> {
           ${webApps.length ? webApps.map((webApp) => `
             <article class="app-card" data-open-id="${webApp.id}" tabindex="0" title="Open ${escapeHtml(webApp.name)} · Right-click to edit">
               <div class="app-icon">${escapeHtml(webApp.name.slice(0, 1).toUpperCase())}</div>
-              <div class="app-info"><h2>${escapeHtml(webApp.name)}</h2><p>${escapeHtml(new URL(webApp.url).hostname)}</p></div>
-              ${webApp.shortcut ? `<kbd>${escapeHtml(webApp.shortcut)}</kbd>` : ""}
+              <div class="app-info">
+                <h2>${escapeHtml(webApp.name)}</h2>
+                <p>${escapeHtml(new URL(webApp.url).hostname)}</p>
+                ${webApp.shortcut ? `<div class="app-shortcut"><span>Shortcut</span><kbd title="${escapeHtml(webApp.shortcut)}">${escapeHtml(webApp.shortcut)}</kbd></div>` : `<div class="app-shortcut muted-shortcut">No shortcut</div>`}
+              </div>
               <button class="icon-button" data-delete-id="${webApp.id}" aria-label="Remove ${escapeHtml(webApp.name)}">×</button>
             </article>`).join("") : `
             <button class="empty-state" id="empty-add-button">
