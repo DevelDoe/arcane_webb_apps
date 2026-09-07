@@ -44,6 +44,8 @@ dialog form { padding: 26px; }
 .dialog-heading h2 { margin: 4px 0 10px; font-size: 25px; }
 dialog input { width: 100%; padding: 11px 12px; color: #edf3f7; background: #080c10; border: 1px solid #2a3740; border-radius: 7px; outline: none; }
 dialog input:focus { border-color: #d7b45d; }
+.shortcut-input { cursor: default; caret-color: transparent; }
+.shortcut-input:focus { background: #11191f; box-shadow: 0 0 0 3px #d7b45d20; }
 .optional { margin-left: 6px; color: #6f7d86; font-size: 11px; }
 .hint { margin: 7px 0 0; color: #6f7d86; font-size: 11px; }
 .error { min-height: 20px; color: #ef7c78; font-size: 13px; }

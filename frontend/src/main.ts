@@ -26,6 +26,21 @@ function normalizeUrl(value: string): string {
   return url.toString();
 }
 
+function shortcutFromKeyEvent(event: KeyboardEvent): string | null {
+  if (["Meta", "Control", "Alt", "Shift"].includes(event.key)) return null;
+  if ((event.key === "Backspace" || event.key === "Delete") && !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey) {
+    return "";
+  }
+
+  const modifiers: string[] = [];
+  if (event.metaKey || event.ctrlKey) modifiers.push("CommandOrControl");
+  if (event.altKey) modifiers.push("Alt");
+  if (event.shiftKey) modifiers.push("Shift");
+
+  const primaryKey = event.code || event.key;
+  return [...modifiers, primaryKey].join("+");
+}
+
 async function syncShortcuts(webApps: WebApp[]): Promise<string[]> {
   const errors: string[] = [];
   for (const shortcut of registeredShortcuts) await unregister(shortcut).catch(() => undefined);
@@ -90,7 +105,7 @@ async function renderWorkspace(): Promise<void> {
         ${shortcutErrors.length ? `<div class="notice">Some shortcuts could not be registered:<br />${shortcutErrors.map(escapeHtml).join("<br />")}</div>` : ""}
         <div class="app-grid">
           ${webApps.length ? webApps.map((webApp) => `
-            <article class="app-card" data-open-id="${webApp.id}" tabindex="0">
+            <article class="app-card" data-open-id="${webApp.id}" tabindex="0" title="Open ${escapeHtml(webApp.name)} · Right-click to edit">
               <div class="app-icon">${escapeHtml(webApp.name.slice(0, 1).toUpperCase())}</div>
               <div class="app-info"><h2>${escapeHtml(webApp.name)}</h2><p>${escapeHtml(new URL(webApp.url).hostname)}</p></div>
               ${webApp.shortcut ? `<kbd>${escapeHtml(webApp.shortcut)}</kbd>` : ""}
@@ -103,13 +118,13 @@ async function renderWorkspace(): Promise<void> {
       </div>
       <dialog id="app-dialog">
         <form method="dialog" id="app-form">
-          <div class="dialog-heading"><div><p class="eyebrow">NEW WEB APP</p><h2>Add a website</h2></div><button type="button" class="icon-button" id="cancel-button">×</button></div>
+          <div class="dialog-heading"><div><p class="eyebrow" id="app-form-eyebrow">NEW WEB APP</p><h2 id="app-form-title">Add a website</h2></div><button type="button" class="icon-button" id="cancel-button">×</button></div>
           <label>Name<input name="name" placeholder="Linear" autocomplete="off" required /></label>
           <label>Website URL<input name="url" placeholder="linear.app" inputmode="url" autocomplete="url" required /></label>
-          <label>Global shortcut <span class="optional">Optional</span><input name="shortcut" placeholder="CommandOrControl+Shift+L" autocomplete="off" /></label>
-          <p class="hint">Examples: CommandOrControl+Shift+L, Alt+Space, F8</p>
+          <label>Global shortcut <span class="optional">Optional</span><input class="shortcut-input" name="shortcut" placeholder="Focus here, then press your shortcut" autocomplete="off" readonly /></label>
+          <p class="hint">Press the keys together to record them. Backspace or Delete clears the shortcut.</p>
           <p class="error" id="form-error"></p>
-          <div class="dialog-actions"><button type="button" class="ghost" id="cancel-secondary">Cancel</button><button type="submit">Add web app</button></div>
+          <div class="dialog-actions"><button type="button" class="ghost" id="cancel-secondary">Cancel</button><button type="submit" id="app-form-submit">Add web app</button></div>
         </form>
       </dialog>
       <dialog id="close-hint-dialog" class="hint-dialog">
@@ -128,11 +143,36 @@ async function renderWorkspace(): Promise<void> {
 
   document.querySelector("#settings-button")?.addEventListener("click", () => void ipc.openSettings());
   const dialog = document.querySelector<HTMLDialogElement>("#app-dialog");
-  const showDialog = () => dialog?.showModal();
-  document.querySelector("#add-button")?.addEventListener("click", showDialog);
-  document.querySelector("#empty-add-button")?.addEventListener("click", showDialog);
+  const form = document.querySelector<HTMLFormElement>("#app-form");
+  const showAppForm = (webApp?: WebApp) => {
+    if (!dialog || !form) return;
+    form.reset();
+    form.dataset.editingId = webApp?.id ?? "";
+    const nameInput = form.elements.namedItem("name") as HTMLInputElement;
+    const urlInput = form.elements.namedItem("url") as HTMLInputElement;
+    const shortcutInput = form.elements.namedItem("shortcut") as HTMLInputElement;
+    nameInput.value = webApp?.name ?? "";
+    urlInput.value = webApp?.url ?? "";
+    shortcutInput.value = webApp?.shortcut ?? "";
+    document.querySelector("#app-form-eyebrow")!.textContent = webApp ? "EDIT WEB APP" : "NEW WEB APP";
+    document.querySelector("#app-form-title")!.textContent = webApp ? `Edit ${webApp.name}` : "Add a website";
+    document.querySelector("#app-form-submit")!.textContent = webApp ? "Save changes" : "Add web app";
+    document.querySelector("#form-error")!.textContent = "";
+    dialog.showModal();
+    nameInput.focus();
+  };
+  document.querySelector("#add-button")?.addEventListener("click", () => showAppForm());
+  document.querySelector("#empty-add-button")?.addEventListener("click", () => showAppForm());
   document.querySelector("#cancel-button")?.addEventListener("click", () => dialog?.close());
   document.querySelector("#cancel-secondary")?.addEventListener("click", () => dialog?.close());
+
+  const shortcutInput = form?.elements.namedItem("shortcut") as HTMLInputElement | null;
+  shortcutInput?.addEventListener("keydown", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const shortcut = shortcutFromKeyEvent(event);
+    if (shortcut !== null) shortcutInput.value = shortcut;
+  });
 
   document.querySelectorAll<HTMLElement>("[data-open-id]").forEach((card) => {
     const open = () => {
@@ -145,6 +185,11 @@ async function renderWorkspace(): Promise<void> {
     card.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") open();
     });
+    card.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      const webApp = webApps.find((candidate) => candidate.id === card.dataset.openId);
+      if (webApp) showAppForm(webApp);
+    });
   });
 
   document.querySelectorAll<HTMLButtonElement>("[data-delete-id]").forEach((button) => {
@@ -156,7 +201,7 @@ async function renderWorkspace(): Promise<void> {
     });
   });
 
-  document.querySelector<HTMLFormElement>("#app-form")?.addEventListener("submit", async (event) => {
+  form?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = event.currentTarget as HTMLFormElement;
     const data = new FormData(form);
@@ -165,11 +210,16 @@ async function renderWorkspace(): Promise<void> {
       const name = String(data.get("name") ?? "").trim();
       const url = normalizeUrl(String(data.get("url") ?? ""));
       const shortcut = String(data.get("shortcut") ?? "").trim();
+      const editingId = form.dataset.editingId || null;
       if (!name) throw new Error("Give the web app a name.");
-      if (shortcut && webApps.some((candidate) => candidate.shortcut.toLowerCase() === shortcut.toLowerCase())) {
+      if (shortcut && webApps.some((candidate) => candidate.id !== editingId && candidate.shortcut.toLowerCase() === shortcut.toLowerCase())) {
         throw new Error("That shortcut is already assigned to another web app.");
       }
-      await writeWebApps([...webApps, { id: crypto.randomUUID(), name, url, shortcut }]);
+      const nextWebApps = editingId
+        ? webApps.map((candidate) => candidate.id === editingId ? { ...candidate, name, url, shortcut } : candidate)
+        : [...webApps, { id: crypto.randomUUID(), name, url, shortcut }];
+      await writeWebApps(nextWebApps);
+      if (editingId) await ipc.updateOpenWebApp(editingId, name, url);
       dialog?.close();
       await renderWorkspace();
     } catch (reason) {

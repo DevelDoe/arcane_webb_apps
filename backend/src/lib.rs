@@ -81,6 +81,19 @@ fn open_web_app(app: tauri::AppHandle, id: String, name: String, url: String) ->
 }
 
 #[tauri::command]
+fn update_open_web_app(app: tauri::AppHandle, id: String, name: String, url: String) -> Result<(), String> {
+    let label = web_app_label(&id)?;
+    let Some(window) = app.get_webview_window(&label) else {
+        return Ok(());
+    };
+    let external_url = url
+        .parse()
+        .map_err(|error| format!("Invalid web app URL: {error}"))?;
+    window.set_title(&name).map_err(|error| error.to_string())?;
+    window.navigate(external_url).map_err(|error| error.to_string())
+}
+
+#[tauri::command]
 fn open_settings_window(app: tauri::AppHandle) -> Result<(), String> {
     if let Some(window) = app.get_webview_window("settings") {
         window.show().map_err(|error| error.to_string())?;
@@ -185,6 +198,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             open_web_app,
+            update_open_web_app,
             open_settings_window,
             reset_local_user_data,
         ])
