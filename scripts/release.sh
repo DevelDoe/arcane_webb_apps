@@ -52,7 +52,9 @@ esac
 
 artifacts=()
 while IFS= read -r -d '' artifact; do
-  artifacts+=("$artifact")
+  if [[ "$(basename "$artifact")" == *"$version"* ]]; then
+    artifacts+=("$artifact")
+  fi
 done < <(find "$bundle_dir" -type f \( \
   -name 'Arcane-Webb-Apps_*_macOS_*.zip' -o -name '*.AppImage' -o -name '*.deb' -o -name '*.rpm' -o \
   -name '*.msi' -o -name '*-setup.exe' \
