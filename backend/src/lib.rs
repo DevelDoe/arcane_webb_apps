@@ -1,5 +1,5 @@
 use tauri::{
-    menu::{Menu, MenuItem, Submenu},
+    menu::{Menu, MenuItem, Submenu, SubmenuBuilder},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent,
 };
@@ -131,6 +131,15 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .menu(|app| {
+            let edit_menu = SubmenuBuilder::new(app, "Edit")
+                .undo()
+                .redo()
+                .separator()
+                .cut()
+                .copy()
+                .paste()
+                .select_all()
+                .build()?;
             let close_window = MenuItem::with_id(
                 app,
                 "close-focused-window",
@@ -139,7 +148,7 @@ pub fn run() {
                 Some("CmdOrCtrl+W"),
             )?;
             let window_menu = Submenu::with_items(app, "Window", true, &[&close_window])?;
-            Menu::with_items(app, &[&window_menu])
+            Menu::with_items(app, &[&edit_menu, &window_menu])
         })
         .on_menu_event(|app, event| {
             if event.id() == "close-focused-window" {
