@@ -1,4 +1,7 @@
-use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{
+    menu::{Menu, PredefinedMenuItem, Submenu},
+    Manager, WebviewUrl, WebviewWindowBuilder,
+};
 
 fn web_app_label(id: &str) -> Result<String, String> {
     if id.is_empty() || !id.chars().all(|character| character.is_ascii_alphanumeric() || character == '-') {
@@ -66,6 +69,11 @@ fn reset_local_user_data(app: tauri::AppHandle) -> Result<(), String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .menu(|app| {
+            let close_window = PredefinedMenuItem::close_window(app, Some("Close Window"))?;
+            let window_menu = Submenu::with_items(app, "Window", true, &[&close_window])?;
+            Menu::with_items(app, &[&window_menu])
+        })
         .setup(|app| {
             app.handle().plugin(tauri_plugin_store::Builder::default().build())?;
             Ok(())
