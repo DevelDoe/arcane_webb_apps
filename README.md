@@ -16,6 +16,7 @@ websites you use every day one keystroke away.
 - Add any HTTP or HTTPS website
 - Launch sites in separate frameless windows
 - Assign optional system-wide keyboard shortcuts
+- Lives quietly in the macOS menu bar or Windows/Linux system tray
 - Focus an existing app window instead of opening duplicates
 - Store your app list and preferences locally
 - No account, telemetry, or cloud service
@@ -49,6 +50,8 @@ on which maintainers can build and test them. You can always build from source.
 
 Global shortcuts work while Arcane Webb Apps is running. Common shortcut names
 include `CommandOrControl`, `Shift`, `Alt`, and function keys such as `F8`.
+Closing the launcher hides it to the tray so those shortcuts remain available. Use
+the tray menu's **Quit Webb Apps** action when you want to stop it completely.
 
 ## Build from source
 

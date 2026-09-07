@@ -1,7 +1,15 @@
 use tauri::{
-    menu::{Menu, PredefinedMenuItem, Submenu},
-    Manager, WebviewUrl, WebviewWindowBuilder,
+    menu::{Menu, MenuItem, PredefinedMenuItem, Submenu},
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+    Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent,
 };
+
+fn show_launcher(app: &tauri::AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.set_focus();
+    }
+}
 
 fn web_app_label(id: &str) -> Result<String, String> {
     if id.is_empty() || !id.chars().all(|character| character.is_ascii_alphanumeric() || character == '-') {
@@ -76,6 +84,46 @@ pub fn run() {
         })
         .setup(|app| {
             app.handle().plugin(tauri_plugin_store::Builder::default().build())?;
+
+            #[cfg(target_os = "macos")]
+            app.handle()
+                .set_activation_policy(tauri::ActivationPolicy::Accessory)?;
+
+            let open_launcher = MenuItem::with_id(app, "tray-open", "Open Webb Apps", true, None::<&str>)?;
+            let quit = MenuItem::with_id(app, "tray-quit", "Quit Webb Apps", true, None::<&str>)?;
+            let tray_menu = Menu::with_items(app, &[&open_launcher, &quit])?;
+
+            TrayIconBuilder::with_id("main-tray")
+                .icon(app.default_window_icon().cloned().expect("application icon is configured"))
+                .tooltip("Arcane Webb Apps")
+                .menu(&tray_menu)
+                .show_menu_on_left_click(false)
+                .on_menu_event(|app, event| match event.id().as_ref() {
+                    "tray-open" => show_launcher(app),
+                    "tray-quit" => app.exit(0),
+                    _ => {}
+                })
+                .on_tray_icon_event(|tray, event| {
+                    if let TrayIconEvent::Click {
+                        button: MouseButton::Left,
+                        button_state: MouseButtonState::Up,
+                        ..
+                    } = event
+                    {
+                        show_launcher(tray.app_handle());
+                    }
+                })
+                .build(app)?;
+
+            if let Some(main_window) = app.get_webview_window("main") {
+                let window_to_hide = main_window.clone();
+                main_window.on_window_event(move |event| {
+                    if let WindowEvent::CloseRequested { api, .. } = event {
+                        api.prevent_close();
+                        let _ = window_to_hide.hide();
+                    }
+                });
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
