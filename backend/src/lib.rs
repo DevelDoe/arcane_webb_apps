@@ -18,6 +18,45 @@ fn web_app_label(id: &str) -> Result<String, String> {
     Ok(format!("web-app-{id}"))
 }
 
+fn drag_handle_script(window_label: &str) -> String {
+    format!(
+        r#"
+        (() => {{
+          const installDragHandle = () => {{
+            if (document.getElementById('__webb_apps_drag_handle')) return;
+            const handle = document.createElement('button');
+            handle.id = '__webb_apps_drag_handle';
+            handle.type = 'button';
+            handle.title = 'Drag window';
+            handle.setAttribute('aria-label', 'Drag window');
+            handle.textContent = '•••';
+            Object.assign(handle.style, {{
+              position: 'fixed', top: '6px', left: '50%', transform: 'translateX(-50%)',
+              width: '48px', height: '20px', padding: '0', margin: '0',
+              border: '1px solid rgba(255,255,255,.28)', borderRadius: '999px',
+              color: 'rgba(255,255,255,.82)', background: 'rgba(12,16,20,.72)',
+              backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+              boxShadow: '0 2px 10px rgba(0,0,0,.3)', cursor: 'move',
+              font: '700 10px/18px system-ui', letterSpacing: '2px',
+              zIndex: '2147483647', userSelect: 'none', WebkitUserSelect: 'none'
+            }});
+            handle.addEventListener('mousedown', (event) => {{
+              if (event.button !== 0) return;
+              event.preventDefault();
+              window.__TAURI_INTERNALS__.invoke('plugin:window|start_dragging', {{ label: '{window_label}' }});
+            }});
+            document.documentElement.appendChild(handle);
+          }};
+          if (document.readyState === 'loading') {{
+            document.addEventListener('DOMContentLoaded', installDragHandle, {{ once: true }});
+          }} else {{
+            installDragHandle();
+          }}
+        }})();
+        "#
+    )
+}
+
 #[tauri::command]
 fn open_web_app(app: tauri::AppHandle, id: String, name: String, url: String) -> Result<(), String> {
     let label = web_app_label(&id)?;
@@ -35,6 +74,7 @@ fn open_web_app(app: tauri::AppHandle, id: String, name: String, url: String) ->
         .inner_size(1180.0, 780.0)
         .min_inner_size(480.0, 360.0)
         .decorations(false)
+        .initialization_script(drag_handle_script(&format!("web-app-{id}")))
         .build()
         .map_err(|error| error.to_string())?;
     Ok(())

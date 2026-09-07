@@ -51,6 +51,10 @@ dialog input:focus { border-color: #d7b45d; }
 .hint-dialog { padding: 30px; text-align: center; }
 .hint-dialog h2 { margin: 5px 0 8px; font-size: 24px; }
 .hint-dialog .muted { margin-inline: auto; max-width: 390px; }
+.usage-tips { display: grid; gap: 10px; margin: 20px 0; text-align: left; }
+.usage-tips p { margin: 0; padding: 12px 14px; display: grid; grid-template-columns: 62px 1fr; gap: 10px; border: 1px solid #27343d; border-radius: 9px; background: #0a1014; }
+.usage-tips strong { color: #d7b45d; font-size: 12px; }
+.usage-tips span { color: #9aa7af; font-size: 12px; line-height: 1.5; }
 .shortcut-hero { width: fit-content; margin: 0 auto 22px; padding: 14px 20px; border: 1px solid #4d5b64; border-bottom-width: 4px; border-radius: 11px; color: #f3d67e; background: #090e12; font: 800 25px ui-monospace, monospace; box-shadow: 0 8px 24px #0007; }
 .check-row { display: flex; align-items: center; justify-content: center; gap: 9px; margin: 22px 0; }
 .hint-dialog .dialog-actions { justify-content: center; }

@@ -43,6 +43,12 @@ export async function writeSettings(settings: WebbAppsSettings): Promise<void> {
   await shellStore.save();
 }
 
+export async function setCloseHintDismissed(dismissed: boolean): Promise<void> {
+  const shellStore = await getShellStore();
+  await shellStore.set("settings.dismissCloseHint", dismissed);
+  await shellStore.save();
+}
+
 export async function readWebApps(): Promise<WebApp[]> {
   const shellStore = await getShellStore();
   return (await shellStore.get<WebApp[]>("webApps")) ?? [];

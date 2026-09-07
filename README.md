@@ -15,6 +15,7 @@ websites you use every day one keystroke away.
 
 - Add any HTTP or HTTPS website
 - Launch sites in separate frameless windows
+- Reposition frameless windows from a small fixed overlay handle
 - Assign optional system-wide keyboard shortcuts
 - Lives quietly in the macOS menu bar or Windows/Linux system tray
 - Focus an existing app window instead of opening duplicates

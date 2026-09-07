@@ -1,14 +1,13 @@
 import { getAllWindows, getCurrentWindow } from "@tauri-apps/api/window";
 import { register, unregister } from "@tauri-apps/plugin-global-shortcut";
 import { ipc } from "./ipc";
-import { readSettings, readWebApps, type WebApp, writeSettings, writeWebApps } from "./store";
+import { readSettings, readWebApps, setCloseHintDismissed, type WebApp, writeSettings, writeWebApps } from "./store";
 import "./style.css";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 if (!app) throw new Error("Missing #app root");
 
 let registeredShortcuts = new Set<string>();
-let currentSettings: Awaited<ReturnType<typeof readSettings>> | null = null;
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>'"]/g, (character) => ({
@@ -49,7 +48,7 @@ function closeShortcut(): string {
 }
 
 async function requestWebAppLaunch(webApp: WebApp): Promise<void> {
-  const settings = currentSettings ?? await readSettings();
+  const settings = await readSettings();
   if (settings.dismissCloseHint) {
     await ipc.openWebApp(webApp.id, webApp.name, webApp.url);
     return;
@@ -116,8 +115,12 @@ async function renderWorkspace(): Promise<void> {
       <dialog id="close-hint-dialog" class="hint-dialog">
         <div class="shortcut-hero" id="close-shortcut">⌘W</div>
         <p class="eyebrow">QUICK REMINDER</p>
-        <h2>Closing <span id="close-hint-app-name"></span></h2>
-        <p class="muted">This web app opens without a title bar. Press <strong id="close-shortcut-copy">${closeShortcut()}</strong> whenever you want to close its window.</p>
+        <h2>Using <span id="close-hint-app-name"></span></h2>
+        <div class="usage-tips">
+          <p><strong>Close it</strong><span>Press <b id="close-shortcut-copy">${closeShortcut()}</b> to close the frameless window.</span></p>
+          <p><strong>Move it</strong><span>Drag the small fixed handle at the top of the web app. It floats over the page and takes up no layout space.</span></p>
+          <p><strong>Place it</strong><span>For fast, precise positioning, a Special/Hyper key or a window-zoning app is usually the best experience.</span></p>
+        </div>
         <label class="check-row"><input id="hide-close-hint" type="checkbox" /> Don’t show this again</label>
         <div class="dialog-actions"><button type="button" class="ghost" id="close-hint-cancel">Cancel</button><button type="button" id="close-hint-continue">Open web app</button></div>
       </dialog>
@@ -181,8 +184,7 @@ async function renderWorkspace(): Promise<void> {
     if (!webApp) return;
     const hideHint = document.querySelector<HTMLInputElement>("#hide-close-hint")?.checked ?? false;
     if (hideHint) {
-      currentSettings = { ...settings, dismissCloseHint: true };
-      await writeSettings(currentSettings);
+      await setCloseHintDismissed(true);
     }
     closeHintDialog?.close();
     await ipc.openWebApp(webApp.id, webApp.name, webApp.url);
@@ -220,7 +222,6 @@ async function bootstrap(): Promise<void> {
     await renderSettings();
     return;
   }
-  currentSettings = await readSettings();
   await renderWorkspace();
 }
 
