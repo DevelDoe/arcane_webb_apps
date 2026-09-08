@@ -59,7 +59,9 @@ async function syncShortcuts(webApps: WebApp[]): Promise<string[]> {
 }
 
 function closeShortcut(): string {
-  return /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? "⌘W" : "Ctrl+W";
+  if (/Mac|iPhone|iPad|iPod/.test(navigator.platform)) return "⌘W";
+  if (/Win/.test(navigator.platform)) return "Ctrl+W or Alt+F4";
+  return "Ctrl+W";
 }
 
 async function requestWebAppLaunch(webApp: WebApp): Promise<void> {

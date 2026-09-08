@@ -166,16 +166,36 @@ pub fn run() {
                 "close-focused-window",
                 "Close Window",
                 true,
-                Some("CmdOrCtrl+W"),
+                Some(if cfg!(target_os = "macos") {
+                    "Cmd+W"
+                } else if cfg!(target_os = "windows") {
+                    "Alt+F4"
+                } else {
+                    "Ctrl+W"
+                }),
             )?;
-            let window_menu = SubmenuBuilder::new(app, "Window")
+            let close_window_ctrl = if cfg!(target_os = "windows") {
+                Some(MenuItem::with_id(
+                    app,
+                    "close-focused-window-ctrl",
+                    "Close Window (Ctrl+W)",
+                    true,
+                    Some("Ctrl+W"),
+                )?)
+            } else {
+                None
+            };
+            let mut window_menu_builder = SubmenuBuilder::new(app, "Window")
                 .item(&reload_window)
                 .separator()
                 .item(&minimize_window)
                 .item(&fullscreen_window)
                 .separator()
-                .item(&close_window)
-                .build()?;
+                .item(&close_window);
+            if let Some(close_window_ctrl) = &close_window_ctrl {
+                window_menu_builder = window_menu_builder.item(close_window_ctrl);
+            }
+            let window_menu = window_menu_builder.build()?;
             Menu::with_items(app, &[&edit_menu, &window_menu])
         })
         .on_menu_event(|app, event| {
@@ -198,7 +218,7 @@ pub fn run() {
                         let _ = window.set_fullscreen(!is_fullscreen);
                     }
                 }
-                "close-focused-window" => {
+                "close-focused-window" | "close-focused-window-ctrl" => {
                     let _ = window.close();
                 }
                 _ => {}
