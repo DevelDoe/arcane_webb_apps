@@ -34,7 +34,8 @@ extract the app, control-click it, and choose **Open** once.
 
 Use the settings icon or right-click an app to edit it. Drag a frameless window from
 the small handle at its top. Close it with `⌘W` on macOS or `Ctrl+W` on Windows and
-Linux.
+Linux. Reload with `⌘R`/`Ctrl+R`, minimize with `⌘M`/`Alt+F9`, and toggle fullscreen
+with `⌃⌘F`/`F11`.
 
 Closing the main launcher sends Webb Apps to the menu bar or system tray, where it
 continues listening for your shortcuts. Choose **Quit Webb Apps** from the tray menu

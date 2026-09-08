@@ -1,5 +1,5 @@
 use tauri::{
-    menu::{Menu, MenuItem, Submenu, SubmenuBuilder},
+    menu::{Menu, MenuItem, SubmenuBuilder},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent,
 };
@@ -140,6 +140,27 @@ pub fn run() {
                 .paste()
                 .select_all()
                 .build()?;
+            let reload_window = MenuItem::with_id(
+                app,
+                "reload-focused-window",
+                "Reload Page",
+                true,
+                Some("CmdOrCtrl+R"),
+            )?;
+            let minimize_window = MenuItem::with_id(
+                app,
+                "minimize-focused-window",
+                "Minimize",
+                true,
+                Some(if cfg!(target_os = "macos") { "Cmd+M" } else { "Alt+F9" }),
+            )?;
+            let fullscreen_window = MenuItem::with_id(
+                app,
+                "fullscreen-focused-window",
+                "Toggle Full Screen",
+                true,
+                Some(if cfg!(target_os = "macos") { "Ctrl+Cmd+F" } else { "F11" }),
+            )?;
             let close_window = MenuItem::with_id(
                 app,
                 "close-focused-window",
@@ -147,18 +168,40 @@ pub fn run() {
                 true,
                 Some("CmdOrCtrl+W"),
             )?;
-            let window_menu = Submenu::with_items(app, "Window", true, &[&close_window])?;
+            let window_menu = SubmenuBuilder::new(app, "Window")
+                .item(&reload_window)
+                .separator()
+                .item(&minimize_window)
+                .item(&fullscreen_window)
+                .separator()
+                .item(&close_window)
+                .build()?;
             Menu::with_items(app, &[&edit_menu, &window_menu])
         })
         .on_menu_event(|app, event| {
-            if event.id() == "close-focused-window" {
-                if let Some(window) = app
-                    .webview_windows()
-                    .into_values()
-                    .find(|window| window.is_focused().unwrap_or(false))
-                {
+            let Some(window) = app
+                .webview_windows()
+                .into_values()
+                .find(|window| window.is_focused().unwrap_or(false))
+            else {
+                return;
+            };
+            match event.id().as_ref() {
+                "reload-focused-window" => {
+                    let _ = window.reload();
+                }
+                "minimize-focused-window" => {
+                    let _ = window.minimize();
+                }
+                "fullscreen-focused-window" => {
+                    if let Ok(is_fullscreen) = window.is_fullscreen() {
+                        let _ = window.set_fullscreen(!is_fullscreen);
+                    }
+                }
+                "close-focused-window" => {
                     let _ = window.close();
                 }
+                _ => {}
             }
         })
         .setup(|app| {
