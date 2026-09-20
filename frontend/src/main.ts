@@ -58,6 +58,10 @@ async function syncShortcuts(webApps: WebApp[]): Promise<string[]> {
   return errors;
 }
 
+function faviconUrl(websiteUrl: string): string {
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(websiteUrl).hostname)}&sz=128`;
+}
+
 function closeShortcut(): string {
   if (/Mac|iPhone|iPad|iPod/.test(navigator.platform)) return "⌘W";
   if (/Win/.test(navigator.platform)) return "Ctrl+W or Alt+F4";
@@ -108,7 +112,10 @@ async function renderWorkspace(): Promise<void> {
         <div class="app-grid">
           ${webApps.length ? webApps.map((webApp) => `
             <article class="app-card" data-open-id="${webApp.id}" tabindex="0" title="Open ${escapeHtml(webApp.name)} · Right-click to edit">
-              <div class="app-icon">${escapeHtml(webApp.name.slice(0, 1).toUpperCase())}</div>
+              <div class="app-icon">
+                <span class="app-letter">${escapeHtml(webApp.name.slice(0, 1).toUpperCase())}</span>
+                <img class="app-favicon" src="${escapeHtml(faviconUrl(webApp.url))}" alt="" onerror="this.classList.add('is-failed')" />
+              </div>
               <div class="app-info">
                 <h2>${escapeHtml(webApp.name)}</h2>
                 <p>${escapeHtml(new URL(webApp.url).hostname)}</p>
@@ -146,6 +153,12 @@ async function renderWorkspace(): Promise<void> {
         </div>
         <label class="check-row"><input id="hide-close-hint" type="checkbox" /> Don’t show this again</label>
         <div class="dialog-actions"><button type="button" class="ghost" id="close-hint-cancel">Cancel</button><button type="button" id="close-hint-continue">Open web app</button></div>
+      </dialog>
+      <dialog id="delete-dialog" class="hint-dialog">
+        <p class="eyebrow">REMOVE WEB APP</p>
+        <h2>Remove <span id="delete-app-name"></span>?</h2>
+        <p class="muted">This only removes it from Webb Apps. The website itself is unchanged.</p>
+        <div class="dialog-actions"><button type="button" class="ghost" id="delete-cancel">Cancel</button><button type="button" class="danger" id="delete-confirm">Remove</button></div>
       </dialog>
     </section>`;
 
@@ -207,13 +220,25 @@ async function renderWorkspace(): Promise<void> {
     });
   });
 
+  const deleteDialog = document.querySelector<HTMLDialogElement>("#delete-dialog");
+  const deleteAppName = document.querySelector<HTMLElement>("#delete-app-name");
   document.querySelectorAll<HTMLButtonElement>("[data-delete-id]").forEach((button) => {
-    button.addEventListener("click", async () => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
       const webApp = webApps.find((candidate) => candidate.id === button.dataset.deleteId);
-      if (!webApp || !confirm(`Remove ${webApp.name}?`)) return;
-      await writeWebApps(webApps.filter((candidate) => candidate.id !== webApp.id));
-      await renderWorkspace();
+      if (!webApp || !deleteDialog || !deleteAppName) return;
+      deleteAppName.textContent = webApp.name;
+      deleteDialog.dataset.pendingAppId = webApp.id;
+      deleteDialog.showModal();
     });
+  });
+  document.querySelector("#delete-cancel")?.addEventListener("click", () => deleteDialog?.close());
+  document.querySelector("#delete-confirm")?.addEventListener("click", async () => {
+    const webApp = webApps.find((candidate) => candidate.id === deleteDialog?.dataset.pendingAppId);
+    if (!webApp) return;
+    await writeWebApps(webApps.filter((candidate) => candidate.id !== webApp.id));
+    deleteDialog?.close();
+    await renderWorkspace();
   });
 
   form?.addEventListener("submit", async (event) => {

@@ -25,7 +25,9 @@ label { display: grid; gap: 7px; margin-top: 18px; color: #b8c3ca; font-size: 13
 .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 48px; }
 .app-card { position: relative; min-height: 126px; padding: 20px 76px 18px 18px; display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: start; gap: 14px; border: 1px solid #243039; border-radius: 14px; background: #0d1318cc; cursor: pointer; transition: transform .15s ease, border-color .15s ease, background .15s ease; }
 .app-card:hover, .app-card:focus { transform: translateY(-2px); border-color: #52616b; background: #111a20; outline: none; }
-.app-icon { width: 48px; height: 48px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 12px; color: #0b1014; background: #d7b45d; font-size: 20px; font-weight: 900; }
+.app-icon { position: relative; width: 48px; height: 48px; flex: 0 0 auto; display: grid; place-items: center; overflow: hidden; border-radius: 12px; color: #0b1014; background: #d7b45d; font-size: 20px; font-weight: 900; }
+.app-favicon { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #f4f6f7; }
+.app-favicon.is-failed { display: none; }
 .app-info { min-width: 0; }
 .app-info h2 { margin: 1px 0 5px; overflow: hidden; font-size: 16px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
 .app-info p { margin: 0; overflow: hidden; color: #7e8b94; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
