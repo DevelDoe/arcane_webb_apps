@@ -19,6 +19,8 @@ jobs:
         include:
           - os: windows-latest
             platform: windows
+          - os: macos-latest
+            platform: macos
           - os: ubuntu-22.04
             platform: linux
 
@@ -90,6 +92,11 @@ jobs:
         run: cargo tauri build --bundles nsis
         working-directory: backend
 
+      - name: Build Tauri app (macOS DMG)
+        if: matrix.platform == 'macos'
+        run: cargo tauri build --bundles dmg
+        working-directory: backend
+
       - name: Build Tauri app (Linux AppImage)
         if: matrix.platform == 'linux'
         run: cargo tauri build --bundles appimage
@@ -107,6 +114,10 @@ jobs:
             windows)
               ARTIFACT="$(ls -1 backend/target/release/bundle/nsis/*.exe | head -n 1 || true)"
               BUNDLE_NAME="Arcane-Webb-Apps-${VERSION}-windows-setup.exe"
+              ;;
+            macos)
+              ARTIFACT="$(ls -1 backend/target/release/bundle/dmg/*.dmg | head -n 1 || true)"
+              BUNDLE_NAME="Arcane-Webb-Apps-${VERSION}-macos.dmg"
               ;;
             linux)
               ARTIFACT="$(ls -1 backend/target/release/bundle/appimage/*.AppImage | head -n 1 || true)"
@@ -177,7 +188,8 @@ jobs:
             | Platform | File |
             |----------|------|
             | **Windows** | `Arcane-Webb-Apps-*-windows-setup.exe` |
+            | **macOS** | `Arcane-Webb-Apps-*-macos.dmg` |
             | **Linux** | `Arcane-Webb-Apps-*-linux.AppImage` |
 
-            Builds are unsigned. On Windows, choose **More info → Run anyway** if SmartScreen blocks the installer. On Linux, `chmod +x` the AppImage, then run it.
+            Builds are unsigned. On Windows, choose **More info → Run anyway** if SmartScreen blocks the installer. On macOS, control-click the app and choose **Open**. On Linux, `chmod +x` the AppImage, then run it.
           files: release-assets/*
