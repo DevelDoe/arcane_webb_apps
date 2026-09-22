@@ -7,4 +7,6 @@ export const ipc = {
     invoke<void>("update_open_web_app", { id, name, url }),
   openSettings: () => invoke<void>("open_settings_window"),
   resetLocalData: () => invoke<void>("reset_local_user_data"),
+  applyShellPrefs: (startOnBoot: boolean, minimizeToTray: boolean) =>
+    invoke<void>("apply_shell_prefs", { startOnBoot, minimizeToTray }),
 };

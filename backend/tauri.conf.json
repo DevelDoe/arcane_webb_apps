@@ -1,11 +1,17 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Arcane Webb Apps",
-  "version": "0.1.3",
+  "productName": "Arcane Web Apps",
+  "version": "0.2.2",
   "identifier": "com.develdoe.arcanewebbapps",
   "build": {
-    "beforeDevCommand": { "script": "npm run dev", "cwd": "../frontend" },
-    "beforeBuildCommand": { "script": "npm run build", "cwd": "../frontend" },
+    "beforeDevCommand": {
+      "script": "npm run dev",
+      "cwd": "../frontend"
+    },
+    "beforeBuildCommand": {
+      "script": "npm run build",
+      "cwd": "../frontend"
+    },
     "devUrl": "http://localhost:1423",
     "frontendDist": "../frontend/dist"
   },
@@ -13,17 +19,20 @@
     "windows": [
       {
         "label": "main",
-        "title": "Arcane Webb Apps",
+        "title": "Arcane Web Apps",
         "width": 1280,
         "height": 820,
         "minWidth": 800,
         "minHeight": 560,
         "visible": true,
         "focus": true,
+        "devtools": true,
         "dragDropEnabled": false
       }
     ],
-    "security": { "csp": null }
+    "security": {
+      "csp": null
+    }
   },
   "bundle": {
     "active": true,

@@ -4,40 +4,40 @@ GitHub Actions builds **Windows**, **macOS** (Apple Silicon DMG), and **Linux** 
 
 A normal `git push` does **not** create a release.
 
-## 1. Pull
+## One-command release (recommended)
 
-```sh
+From the repo root:
+
+```bash
 git pull
+node scripts/release.mjs --version 0.1.4 --publish
 ```
 
-## 2. Bump the version (if this is a new release)
+That bumps the version, commits, tags `v0.1.4`, and pushes. CI then builds the installers.
 
-Set the same version in:
+## Version files
+
+The script keeps these in sync:
 
 - `backend/tauri.conf.json`
 - `backend/Cargo.toml`
 - `frontend/package.json`
 
-Example: `0.1.3` → `0.1.4`
+Use a new version each release. Do not reuse a tag that already exists.
 
-## 3. Commit and push the code
+## Manual fallback (no `--publish`)
 
-```sh
-git add .
+```bash
+git pull
+node scripts/release.mjs --version 0.1.4
+git add backend/tauri.conf.json backend/Cargo.toml frontend/package.json
 git commit -m "Release v0.1.4"
+git tag -a v0.1.4 -m "Release v0.1.4"
 git push
+git push origin --follow-tags
 ```
 
-## 4. Tag and push the tag
-
-The tag must match the version, with a `v` prefix.
-
-```sh
-git tag v0.1.4
-git push origin v0.1.4
-```
-
-## 5. Wait for CI
+## Wait for CI
 
 1. Open **Actions** → **Build and Release**
 2. Wait until all three platform jobs are green
@@ -45,14 +45,10 @@ git push origin v0.1.4
 
 | Platform | File |
 |----------|------|
-| Windows | `Arcane-Webb-Apps-*-windows-setup.exe` |
-| macOS | `Arcane-Webb-Apps-*-macos.dmg` |
-| Linux | `Arcane-Webb-Apps-*-linux.AppImage` |
+| Windows | `Arcane-Web-Apps-*-windows-setup.exe` |
+| macOS | `Arcane-Web-Apps-*-macos.dmg` |
+| Linux | `Arcane-Web-Apps-*-linux.AppImage` |
 
 Builds are unsigned. Windows: **More info → Run anyway**. macOS: control-click → **Open**. Linux: `chmod +x` the AppImage, then run it.
 
-## Notes
-
-- Next release: bump the number (`v0.1.5`, `v0.2.0`, …)
-- Do not reuse a tag that already exists
-- To test a build without a release: **Actions → Build and Release → Run workflow**
+To test a build without a release: **Actions → Build and Release → Run workflow**.

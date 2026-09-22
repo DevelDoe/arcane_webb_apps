@@ -7,10 +7,11 @@ async function getShellStore(): Promise<Store> {
   return shellStore;
 }
 
-export type WebbAppsSettings = {
+export type WebAppsSettings = {
   alwaysOnTop: boolean;
-  compactMode: boolean;
   dismissCloseHint: boolean;
+  startOnBoot: boolean;
+  minimizeToTray: boolean;
 };
 
 export type WebApp = {
@@ -20,26 +21,30 @@ export type WebApp = {
   shortcut: string;
 };
 
-const defaults: WebbAppsSettings = {
+const defaults: WebAppsSettings = {
   alwaysOnTop: false,
-  compactMode: false,
   dismissCloseHint: false,
+  startOnBoot: true,
+  minimizeToTray: true,
 };
 
-export async function readSettings(): Promise<WebbAppsSettings> {
+export async function readSettings(): Promise<WebAppsSettings> {
   const shellStore = await getShellStore();
   return {
     alwaysOnTop: (await shellStore.get<boolean>("settings.alwaysOnTop")) ?? defaults.alwaysOnTop,
-    compactMode: (await shellStore.get<boolean>("settings.compactMode")) ?? defaults.compactMode,
     dismissCloseHint: (await shellStore.get<boolean>("settings.dismissCloseHint")) ?? defaults.dismissCloseHint,
+    startOnBoot: (await shellStore.get<boolean>("settings.startOnBoot")) ?? defaults.startOnBoot,
+    minimizeToTray: (await shellStore.get<boolean>("settings.minimizeToTray")) ?? defaults.minimizeToTray,
   };
 }
 
-export async function writeSettings(settings: WebbAppsSettings): Promise<void> {
+export async function writeSettings(settings: WebAppsSettings): Promise<void> {
   const shellStore = await getShellStore();
   await shellStore.set("settings.alwaysOnTop", settings.alwaysOnTop);
-  await shellStore.set("settings.compactMode", settings.compactMode);
+  await shellStore.delete("settings.compactMode");
   await shellStore.set("settings.dismissCloseHint", settings.dismissCloseHint);
+  await shellStore.set("settings.startOnBoot", settings.startOnBoot);
+  await shellStore.set("settings.minimizeToTray", settings.minimizeToTray);
   await shellStore.save();
 }
 
